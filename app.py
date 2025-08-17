@@ -15,18 +15,27 @@ from common_models import Prompt
 
 class ClipboardToolApp:
     def __init__(self):
-        ctk.set_appearance_mode("System")
-
-        self.app = ctk.CTk()
-        self.app.withdraw()
-        # ウィンドウタイトルを設定（i18n）
+        # Load locale and theme from config before building UI
         try:
             from config_manager import load_config as _lc
             _cfg = _lc()
             if _cfg:
+                # i18n first
                 set_locale(getattr(_cfg, 'language', 'auto'))
+                # theme mode: 'system' | 'light' | 'dark'
+                tm = getattr(_cfg, 'theme_mode', 'system') or 'system'
+                if tm.lower() == 'light':
+                    ctk.set_appearance_mode("Light")
+                elif tm.lower() == 'dark':
+                    ctk.set_appearance_mode("Dark")
+                else:
+                    ctk.set_appearance_mode("System")
         except Exception:
-            set_locale('auto')
+            ctk.set_appearance_mode("System")
+
+        self.app = ctk.CTk()
+        self.app.withdraw()
+        # ウィンドウタイトルを設定（i18n）
         self.app.title(tr("app.title"))
 
         # ウィンドウ/タスクバーのアイコン設定

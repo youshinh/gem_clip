@@ -1,39 +1,54 @@
 # styles.py
 
-# --- 色定義 (モノクローム調) ---
-# 全体的に彩度を抑え、目に優しいグレーを基調とした配色
+# Monochrome, Material-inspired tokens (light,dark)
+PRIMARY = ("#4A4A4A", "#303030")
+ON_PRIMARY = ("#FFFFFF", "#FFFFFF")
+PRIMARY_CONTAINER = ("#EAEAEA", "#3A3A3A")
+ON_PRIMARY_CONTAINER = ("#1F1F1F", "#EAEAEA")
 
-# ボタンの基本色
-DEFAULT_BUTTON_FG_COLOR = ("#555555", "#333333")  # ダークグレー
-DEFAULT_BUTTON_TEXT_COLOR = ("#FFFFFF", "#F0F0F0")  # ホワイト
+SECONDARY = ("#5E5E5E", "#3C3C3C")
+ON_SECONDARY = ("#FFFFFF", "#FFFFFF")
+SECONDARY_CONTAINER = ("#E0E0E0", "#303030")
+ON_SECONDARY_CONTAINER = ("#1F1F1F", "#EAEAEA")
 
-# 強調表示用の境界線色
-# 強調表示用の境界線色（赤系に変更）
-HIGHLIGHT_BORDER_COLOR = ("#007ACC", "#007ACC") # 青系の強調色
+SURFACE = ("#F5F5F5", "#2C2C2C")
+ON_SURFACE = ("#1C1C1C", "#EAEAEA")
+SURFACE_VARIANT = ("#E0E0E0", "#3A3A3A")
+ON_SURFACE_VARIANT = ("#707070", "#B5B5B5")
 
-# 各種ボタンの色
-FILE_ATTACH_BUTTON_COLOR = ("#6c757d", "#5a6268") # 標準ボタンと少し変えたグレー
-MATRIX_BUTTON_COLOR = ("#6c757d", "#5a6268")      # 標準ボタンと少し変えたグレー
-CANCEL_BUTTON_COLOR = ("#B0B0B0", "#4D4D4D")      # 明るめのグレー
-CANCEL_BUTTON_TEXT_COLOR = ("#000000", "#FFFFFF")  # 黒と白
-DELETE_BUTTON_COLOR = "#C44141"                   # 彩度を抑えた赤
-DELETE_BUTTON_HOVER_COLOR = "#A43737"             # 少し濃い赤
+ERROR = ("#C44141", "#C44141")
+ON_ERROR = ("#FFFFFF", "#FFFFFF")
+ERROR_CONTAINER = ("#F0D6D6", "#5A2A2A")
+ON_ERROR_CONTAINER = ("#5A2A2A", "#F0D6D6")
 
-# 通知ポップアップの色（彩度を抑えて目に優しく）
+# Buttons (monochrome by default)
+DEFAULT_BUTTON_FG_COLOR = ("#4A4A4A", "#3F3F3F")
+DEFAULT_BUTTON_TEXT_COLOR = ON_PRIMARY
+CANCEL_BUTTON_COLOR = ("#B0B0B0", "#4D4D4D")
+CANCEL_BUTTON_TEXT_COLOR = ("#000000", "#FFFFFF")
+DELETE_BUTTON_COLOR = ERROR[0]
+DELETE_BUTTON_HOVER_COLOR = "#A43737"
+FILE_ATTACH_BUTTON_COLOR = SECONDARY
+MATRIX_BUTTON_COLOR = SECONDARY
+
+# Borders / focus (neutral)
+HIGHLIGHT_BORDER_COLOR = ("#888888", "#9A9A9A")
+
+# Notifications (subtle tones allowed)
 NOTIFICATION_COLORS = {
-    "info":    ("#A9CCE3", "#546E7A"), # ソフトな青
-    "warning": ("#F7DC6F", "#B7950B"), # 落ち着いた黄色
-    "error":   ("#E6B0AA", "#922B21"), # 落ち着いた赤
-    "success": ("#A9DFBF", "#239B56")  # 落ち着いた緑
+    "info":    ("#E6E6E6", "#3A3A3A"),
+    "warning": ("#F2F2E6", "#4A4A3A"),
+    "error":   ERROR_CONTAINER,
+    "success": ("#E6F2EA", "#2F3A33"),
 }
 
-# 履歴アイテムの色
-HISTORY_ITEM_FG_COLOR = ("#F0F0F0", "#2C2C2C")   # 明るいグレー / 暗いグレー
-HISTORY_ITEM_TEXT_COLOR = ("#1C1C1C", "#EAEAEA") # オフブラック / オフホワイト
-FLOW_RESULT_TEXT_COLOR = ("#D94B8C", "#FF8FB7")  # 明るいピンク系（ライト/ダーク）
+# Surfaces / text
+HISTORY_ITEM_FG_COLOR = SURFACE
+HISTORY_ITEM_TEXT_COLOR = ON_SURFACE
+FLOW_RESULT_TEXT_COLOR = ("#2E7D32", "#9CCC65")
 
-# マトリクス上部（進捗/タブバー）の背景色（キャンバスより少し暗め）
-MATRIX_TOP_BG_COLOR = ("#F0F0F0", "#242424")
+# Matrix top bars
+MATRIX_TOP_BG_COLOR = ("#F5F5F5", "#252525")
 
 # --- フォント定義 (変更なし) ---
 FONT_BOLD = ("bold", 14)
@@ -52,7 +67,7 @@ NOTIFICATION_POPUP_ALPHA = 0.9
 
 PROMPT_EDITOR_GEOMETRY = "500x800"
 PROMPT_SELECTION_GEOMETRY = "400x800"
-SETTINGS_WINDOW_GEOMETRY = "520x460"
+SETTINGS_WINDOW_GEOMETRY = "520x380"
 MAIN_WINDOW_GEOMETRY = "480x600"
 
 HISTORY_FRAME_HEIGHT = 200
@@ -60,9 +75,9 @@ HISTORY_FRAME_HEIGHT = 200
 # --- Matrix Batch Processor ---
 # マトリックス関連の色もモノクロームに統一
 MATRIX_WINDOW_GEOMETRY = "1400x700"
-MATRIX_HEADER_BORDER_COLOR = "#A0A0A0"  # 明るいグレーの境界線
-MATRIX_CELL_BORDER_COLOR = "#404040"    # よりコントラストの高いグレーの境界線
-MATRIX_DELETE_BUTTON_COLOR = "#404040"  # よりコントラストの高いグレーの境界線
+MATRIX_HEADER_BORDER_COLOR = ("#707070", "#3F3F3F")
+MATRIX_CELL_BORDER_COLOR = MATRIX_HEADER_BORDER_COLOR
+MATRIX_DELETE_BUTTON_COLOR = ERROR[0]
 # MATRIX_DELETE_BUTTON_COLOR = "#C44141"  # 彩度を抑えた赤
 MATRIX_DELETE_BUTTON_HOVER_COLOR = "#A43737" # 少し濃い赤
 MATRIX_FONT_BOLD = (None, 12, "bold")
@@ -73,27 +88,27 @@ MATRIX_RESULT_CELL_HEIGHT = 60
 MATRIX_CELL_WIDTH = 250 # セルの固定幅を追加
 # 固定（左端）列の推奨最小幅（行番号・削除ボタン・入力・添付/履歴ボタンが収まる程度）
 MATRIX_FIXED_COL_WIDTH = 240
-MATRIX_SUMMARY_FG_COLOR = ("#FAFAFA", "#3A3A3A")  # 行・列・最終まとめ用に少し明るい背景
+MATRIX_SUMMARY_FG_COLOR = PRIMARY_CONTAINER
 
 HISTORY_SELECTOR_POPUP_WIDTH = 350
 HISTORY_SELECTOR_POPUP_MAX_HEIGHT = 400
 
 # メインキャンバスの背景色
-MATRIX_CANVAS_BACKGROUND_COLOR = ("#E0E0E0", "#2C2C2C") # 明るいグレー / 暗いグレー（ダークは#2C2C2Cに統一）
+MATRIX_CANVAS_BACKGROUND_COLOR = SURFACE
 
 # --- Drag & drop highlight colors ---
 # 行ドラッグ時に現在掴んでいる行を示す背景色。
 # 左がライトモード用、右がダークモード用の色です。
-DRAG_ACTIVE_ROW_COLOR = ("#DDE6F7", "#3A4A6F")
+DRAG_ACTIVE_ROW_COLOR = ("#EAEAEA", "#3A3A3A")
 # ドロップターゲットを示す背景色。アクティブ行とは異なる色で区別します。
-DRAG_TARGET_ROW_COLOR = ("#C8DDF0", "#2F3F61")
+DRAG_TARGET_ROW_COLOR = ("#DDDDDD", "#333333")
 
 # --- Popup スタイル ---
 # ポップアップウィンドウの背景色とテキスト色を統一します。
-POPUP_BG_COLOR = ("#F5F5F5", "#2C2C2C")    # 明るめグレー / ダークグレー
-POPUP_TEXT_COLOR = ("#1C1C1C", "#EAEAEA")   # テキスト色（オフブラック / オフホワイト）
+POPUP_BG_COLOR = SURFACE
+POPUP_TEXT_COLOR = ON_SURFACE
 
 # --- 添付ファイル表示エリア ---
 # 左側の添付ファイル名表示パネルの枠と背景
-ATTACH_AREA_BORDER_COLOR = ("#F7DC6F", "#B7950B")  # 落ち着いた黄色系
-ATTACH_AREA_BG_COLOR = ("#FFF9E6", "#3A3A2A")      # 薄いクリーム/ダーク黄土
+ATTACH_AREA_BORDER_COLOR = SURFACE_VARIANT
+ATTACH_AREA_BG_COLOR = ("#F0F0F0", "#2A2A2A")

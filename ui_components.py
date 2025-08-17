@@ -157,6 +157,8 @@ class ActionSelectorWindow(ctk.CTkToplevel):
         self.overrideredirect(True)
         self.attributes("-topmost", True)
         self.geometry(styles.ACTION_SELECTOR_GEOMETRY)  # 固定サイズを設定
+        # 一時的に自動クローズを抑制するためのフラグ（ファイルダイアログ表示中など）
+        self._suspend_auto_close: bool = False
         self.prompts = prompts
         self.on_prompt_selected_callback = on_prompt_selected_callback
         self.agent = agent
@@ -182,6 +184,11 @@ class ActionSelectorWindow(ctk.CTkToplevel):
         header_frame.grid_columnconfigure(0, weight=0, minsize=35)
         header_frame.grid_columnconfigure(1, weight=1)
         header_frame.grid_columnconfigure(2, weight=0)
+        # 行高さが履歴テキストの改行等で変わらないよう固定
+        try:
+            header_frame.grid_rowconfigure(0, minsize=28)
+        except Exception:
+            pass
 
         clipboard_label = ctk.CTkLabel(header_frame, text=tr("action.input"), text_color=styles.HISTORY_ITEM_TEXT_COLOR, anchor="w")
         clipboard_label.grid(row=0, column=0, sticky="w", padx=(0,8))
@@ -246,9 +253,24 @@ class ActionSelectorWindow(ctk.CTkToplevel):
         attach_row_frame.grid_columnconfigure(0, weight=1)
         attach_row_frame.grid_columnconfigure(1, weight=0)
 
-        # 添付ファイル名表示（左側、伸縮）
-        self.attached_files_label = ctk.CTkLabel(attach_row_frame, text="", text_color=styles.HISTORY_ITEM_TEXT_COLOR, anchor="w", justify="left")
-        self.attached_files_label.grid(row=0, column=0, padx=(0,6), sticky="ew")
+        # 添付ファイル名表示（左側、伸縮）: 背景色と枠を付与して視認性を向上
+        self.attached_bg = ctk.CTkFrame(
+            attach_row_frame,
+            fg_color=styles.ATTACH_AREA_BG_COLOR,
+            border_width=1,
+            border_color=styles.ATTACH_AREA_BORDER_COLOR,
+            height=28,
+        )
+        self.attached_bg.grid(row=0, column=0, padx=(0,6), sticky="ew")
+        try:
+            # 固定高さにし、中のラベルで高さが変わらないようにする
+            self.attached_bg.grid_propagate(False)
+        except Exception:
+            pass
+        self.attached_bg.grid_columnconfigure(0, weight=1)
+        self.attached_files_label = ctk.CTkLabel(self.attached_bg, text="", text_color=styles.HISTORY_ITEM_TEXT_COLOR, anchor="w", justify="left")
+        # 高さ28に合わせて内側の余白を調整（縦中央寄せ）
+        self.attached_files_label.grid(row=0, column=0, padx=6, pady=0, sticky="ew")
 
         # 添付ボタン（右側）: 編集ボタンと幅を合わせる
         try:
@@ -306,32 +328,16 @@ class ActionSelectorWindow(ctk.CTkToplevel):
         matrix_button.grid(row=0, column=1, padx=2, sticky="ew")
         self.buttons.append(matrix_button)
 
-        # 設定アイコン（右端）
-        try:
-            candidates = []
-            try:
-                candidates.append(Path.cwd() / "config.ico")
-            except Exception:
-                pass
-            try:
-                candidates.append(Path(__file__).resolve().parent / "config.ico")
-                candidates.append(Path(__file__).resolve().parent.parent / "config.ico")
-            except Exception:
-                pass
-            try:
-                meipass = getattr(sys, "_MEIPASS", None)
-                if meipass:
-                    candidates.append(Path(meipass) / "config.ico")
-            except Exception:
-                pass
-            cfg_path = next((p for p in candidates if p.exists()), None)
-            if cfg_path is None:
-                raise FileNotFoundError("config.ico not found in candidates")
-            cfg_img_pil = Image.open(cfg_path).convert("RGBA")
-            self._cfg_img = ctk.CTkImage(light_image=cfg_img_pil, dark_image=cfg_img_pil, size=(20, 20))
-            self.open_manager_button = ctk.CTkButton(action_buttons_frame, text="", image=self._cfg_img, width=28, height=28, command=self._on_open_prompt_manager)
-        except Exception:
-            self.open_manager_button = ctk.CTkButton(action_buttons_frame, text=tr("settings.title"), width=60, command=self._on_open_prompt_manager, fg_color=styles.DEFAULT_BUTTON_FG_COLOR, text_color=styles.DEFAULT_BUTTON_TEXT_COLOR)
+        # 右端ボタンは「管理」(プロンプト管理画面を開く)
+        self.open_manager_button = ctk.CTkButton(
+            action_buttons_frame,
+            text=tr("tray.manager"),
+            width=80,
+            height=self.button_height,
+            command=self._on_open_prompt_manager,
+            fg_color=styles.DEFAULT_BUTTON_FG_COLOR,
+            text_color=styles.DEFAULT_BUTTON_TEXT_COLOR,
+        )
         self.open_manager_button.grid(row=0, column=2, padx=(6,0), sticky="e")
 
         # 追指示チェックは設けない（回答はクリップボードから処理可能）
@@ -368,6 +374,18 @@ class ActionSelectorWindow(ctk.CTkToplevel):
         try:
             if hasattr(self.agent, '_show_main_window'):
                 self.agent._show_main_window()
+        except Exception:
+            pass
+        finally:
+            self._close_safely()
+
+    def _on_open_settings(self):
+        # Open settings window and close this window safely
+        if getattr(self, '_is_destroying', False):
+            return
+        try:
+            if hasattr(self.agent, 'show_settings_window'):
+                self.agent.show_settings_window()
         except Exception:
             pass
         finally:
@@ -481,6 +499,7 @@ class ActionSelectorWindow(ctk.CTkToplevel):
             return
         # 一時的に隠してファイルダイアログの邪魔をしない
         try:
+            self._suspend_auto_close = True
             self.attributes("-topmost", False)
         except Exception:
             pass
@@ -495,6 +514,9 @@ class ActionSelectorWindow(ctk.CTkToplevel):
             self.deiconify()
             self.lift()
             self.attributes("-topmost", True)
+            # ダイアログ終了後に自動クローズの保留を解除し、タイマーがいればキャンセル
+            self._suspend_auto_close = False
+            self._cancel_scheduled_close()
         except Exception:
             pass
         # 選択結果の反映（ウィンドウは破棄せず、ラベルのみ更新）
@@ -676,7 +698,19 @@ class ActionSelectorWindow(ctk.CTkToplevel):
         elif t == 'file':
             # ファイル再選択
             from tkinter import filedialog
+            # 自動クローズを一時停止してファイルダイアログを開く
+            try:
+                self._suspend_auto_close = True
+                self.attributes("-topmost", False)
+            except Exception:
+                pass
             new_path = filedialog.askopenfilename()
+            try:
+                self.attributes("-topmost", True)
+                self._suspend_auto_close = False
+                self._cancel_scheduled_close()
+            except Exception:
+                pass
             if new_path:
                 self._selected_history_item = {"type": "file", "data": new_path}
         else:
@@ -700,6 +734,8 @@ class ActionSelectorWindow(ctk.CTkToplevel):
 
     def _on_focus_out(self, event):
         # フォーカスが外れたら、少し待ってから本当に外部へ移ったままかを確認し、閉じる
+        if getattr(self, '_suspend_auto_close', False):
+            return
         self._schedule_close_after_delay(800)
 
     def _on_focus_in(self, event):
@@ -727,6 +763,8 @@ class ActionSelectorWindow(ctk.CTkToplevel):
 
     def _close_if_still_inactive(self):
         self._pending_close_id = None
+        if getattr(self, '_suspend_auto_close', False):
+            return
         try:
             # 1) まだこのウィンドウ内にフォーカスがあるなら閉じない
             w = self.focus_get()
@@ -1020,18 +1058,38 @@ class SettingsWindow(ctk.CTkToplevel):
         api_key_frame = ctk.CTkFrame(self, fg_color=styles.HISTORY_ITEM_FG_COLOR)
         api_key_frame.grid(row=0, column=0, columnspan=2, padx=10, pady=10, sticky="ew")
         api_key_frame.grid_columnconfigure(1, weight=1)
+        api_key_frame.grid_columnconfigure(2, weight=0)
+        api_key_frame.grid_columnconfigure(3, weight=0)
 
         ctk.CTkLabel(api_key_frame, text=tr("settings.api_key"), text_color=styles.HISTORY_ITEM_TEXT_COLOR).grid(row=0, column=0, padx=5, pady=5, sticky="w")
         self.api_key_entry = ctk.CTkEntry(api_key_frame, placeholder_text=tr("api.placeholder"), fg_color=styles.HISTORY_ITEM_FG_COLOR, text_color=styles.HISTORY_ITEM_TEXT_COLOR)
-        self.api_key_entry.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
+        self.api_key_entry.grid(row=0, column=1, padx=5, pady=4, sticky="ew")
 
         current_api_key = keyring.get_password(API_SERVICE_ID, "api_key")
         if current_api_key:
             self.api_key_entry.insert(0, "*" * (len(current_api_key) - 4) + current_api_key[-4:])
             self.api_key_entry.configure(state="readonly")
 
-        ctk.CTkButton(api_key_frame, text=tr("common.save"), command=self._save_api_key, fg_color=styles.DEFAULT_BUTTON_FG_COLOR, text_color=styles.DEFAULT_BUTTON_TEXT_COLOR).grid(row=0, column=2, padx=5, pady=5)
-        ctk.CTkButton(api_key_frame, text=tr("common.delete"), command=self._delete_api_key, fg_color=styles.DELETE_BUTTON_COLOR, text_color=styles.DEFAULT_BUTTON_TEXT_COLOR).grid(row=1, column=2, padx=5, pady=5)
+        save_btn = ctk.CTkButton(
+            api_key_frame,
+            text=tr("common.save"),
+            width=90,
+            height=28,
+            command=self._save_api_key,
+            fg_color=styles.DEFAULT_BUTTON_FG_COLOR,
+            text_color=styles.DEFAULT_BUTTON_TEXT_COLOR,
+        )
+        save_btn.grid(row=0, column=2, padx=5, pady=5)
+        delete_btn = ctk.CTkButton(
+            api_key_frame,
+            text=tr("common.delete"),
+            width=90,
+            height=28,
+            command=self._delete_api_key,
+            fg_color=styles.DELETE_BUTTON_COLOR,
+            text_color=styles.DEFAULT_BUTTON_TEXT_COLOR,
+        )
+        delete_btn.grid(row=0, column=3, padx=5, pady=5)
 
         hotkey_frame = ctk.CTkFrame(self, fg_color=styles.HISTORY_ITEM_FG_COLOR)
         hotkey_frame.grid(row=1, column=0, columnspan=2, padx=10, pady=10, sticky="ew")
@@ -1065,11 +1123,8 @@ class SettingsWindow(ctk.CTkToplevel):
         self.btn_clear_matrix = ctk.CTkButton(hotkey_frame, text=tr("common.disable"), width=90, command=lambda: self._clear_hotkey('matrix'), fg_color=styles.CANCEL_BUTTON_COLOR, text_color=styles.CANCEL_BUTTON_TEXT_COLOR)
         self.btn_clear_matrix.grid(row=2, column=3, padx=5, pady=5)
 
-        # Language selector (below hotkeys)
-        lang_frame = ctk.CTkFrame(self, fg_color=styles.HISTORY_ITEM_FG_COLOR)
-        lang_frame.grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="ew")
-        lang_frame.grid_columnconfigure(1, weight=1)
-        ctk.CTkLabel(lang_frame, text=tr("settings.language"), text_color=styles.HISTORY_ITEM_TEXT_COLOR).grid(row=0, column=0, padx=5, pady=5, sticky="w")
+        # Language selector (below theme) aligned with other inputs
+        ctk.CTkLabel(self, text=tr("settings.language"), text_color=styles.HISTORY_ITEM_TEXT_COLOR).grid(row=3, column=0, padx=10, pady=8, sticky="w")
         try:
             names = available_locales()
         except Exception:
@@ -1077,7 +1132,7 @@ class SettingsWindow(ctk.CTkToplevel):
         self._lang_codes = list(names.keys())
         values = list(names.values())
         self._lang_var = ctk.StringVar()
-        self._lang_menu = ctk.CTkOptionMenu(lang_frame, values=values, variable=self._lang_var)
+        self._lang_menu = ctk.CTkOptionMenu(self, values=values, variable=self._lang_var, width=140)
         cur_lang = getattr(self.agent.config, 'language', 'auto') or 'auto'
         if cur_lang not in self._lang_codes:
             cur_lang = 'auto'
@@ -1085,23 +1140,23 @@ class SettingsWindow(ctk.CTkToplevel):
             self._lang_var.set(values[self._lang_codes.index(cur_lang)])
         except Exception:
             self._lang_var.set(values[0])
-        self._lang_menu.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
+        self._lang_menu.grid(row=3, column=1, padx=10, pady=8, sticky="w")
 
-        ctk.CTkLabel(self, text=tr("settings.history.max"), text_color=styles.HISTORY_ITEM_TEXT_COLOR).grid(row=3, column=0, padx=10, pady=10, sticky="w")
-        self.max_history_entry = ctk.CTkEntry(self, fg_color=styles.HISTORY_ITEM_FG_COLOR, text_color=styles.HISTORY_ITEM_TEXT_COLOR)
-        self.max_history_entry.grid(row=3, column=1, padx=10, pady=10, sticky="ew")
+        ctk.CTkLabel(self, text=tr("settings.history.max"), text_color=styles.HISTORY_ITEM_TEXT_COLOR).grid(row=4, column=0, padx=10, pady=8, sticky="w")
+        self.max_history_entry = ctk.CTkEntry(self, width=140, fg_color=styles.HISTORY_ITEM_FG_COLOR, text_color=styles.HISTORY_ITEM_TEXT_COLOR)
+        self.max_history_entry.grid(row=4, column=1, padx=10, pady=8, sticky="w")
         self.max_history_entry.insert(0, str(self.agent.config.max_history_size))
 
         # Flow settings
-        ctk.CTkLabel(self, text=tr("settings.flow.max_steps"), text_color=styles.HISTORY_ITEM_TEXT_COLOR).grid(row=4, column=0, padx=10, pady=10, sticky="w")
-        self.max_flow_steps_entry = ctk.CTkEntry(self, fg_color=styles.HISTORY_ITEM_FG_COLOR, text_color=styles.HISTORY_ITEM_TEXT_COLOR)
-        self.max_flow_steps_entry.grid(row=4, column=1, padx=10, pady=10, sticky="ew")
+        ctk.CTkLabel(self, text=tr("settings.flow.max_steps"), text_color=styles.HISTORY_ITEM_TEXT_COLOR).grid(row=5, column=0, padx=10, pady=8, sticky="w")
+        self.max_flow_steps_entry = ctk.CTkEntry(self, width=140, fg_color=styles.HISTORY_ITEM_FG_COLOR, text_color=styles.HISTORY_ITEM_TEXT_COLOR)
+        self.max_flow_steps_entry.grid(row=5, column=1, padx=10, pady=8, sticky="w")
         try:
             self.max_flow_steps_entry.insert(0, str(getattr(self.agent.config, 'max_flow_steps', 5)))
         except Exception:
             self.max_flow_steps_entry.insert(0, "5")
 
-        ctk.CTkButton(self, text=tr("settings.save_settings"), command=self._save_settings, fg_color=styles.DEFAULT_BUTTON_FG_COLOR, text_color=styles.DEFAULT_BUTTON_TEXT_COLOR).grid(row=5, column=0, columnspan=2, padx=10, pady=20)
+        ctk.CTkButton(self, text=tr("settings.save_settings"), height=30, command=self._save_settings, fg_color=styles.DEFAULT_BUTTON_FG_COLOR, text_color=styles.DEFAULT_BUTTON_TEXT_COLOR).grid(row=6, column=0, columnspan=2, padx=10, pady=12)
 
     def _save_api_key(self):
         new_api_key = self.api_key_entry.get()
@@ -1165,6 +1220,20 @@ class SettingsWindow(ctk.CTkToplevel):
     def _on_hotkey_capture_error(self, e: Exception):
         CTkMessagebox(title=tr("common.error"), message=tr("hotkey.read_failed", details=str(e)), icon="cancel").wait_window()
         self._refresh_hotkey_labels()
+
+        # Appearance (Theme Mode)
+        theme_frame = ctk.CTkFrame(self, fg_color=styles.HISTORY_ITEM_FG_COLOR)
+        theme_frame.grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="ew")
+        theme_frame.grid_columnconfigure(1, weight=1)
+        ctk.CTkLabel(theme_frame, text=tr("settings.theme_mode"), text_color=styles.HISTORY_ITEM_TEXT_COLOR).grid(row=0, column=0, padx=5, pady=5, sticky="w")
+        self._theme_var = ctk.StringVar()
+        theme_values = [tr("settings.theme.system"), tr("settings.theme.light"), tr("settings.theme.dark")]
+        # Determine current value
+        current_theme = getattr(self.agent.config, 'theme_mode', 'system') or 'system'
+        current_idx = { 'system':0, 'light':1, 'dark':2 }.get(current_theme, 0)
+        self._theme_var.set(theme_values[current_idx])
+        self._theme_menu = ctk.CTkOptionMenu(theme_frame, values=theme_values, variable=self._theme_var)
+        self._theme_menu.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
         self._set_hotkey_buttons_state('normal')
 
     def _on_hotkey_captured(self, target: str, recorded_hotkey: str):
@@ -1249,6 +1318,26 @@ class SettingsWindow(ctk.CTkToplevel):
                     self.parent_app.title(tr("app.title"))
                 except Exception:
                     pass
+            except Exception:
+                pass
+            # Theme save/apply
+            try:
+                theme_label = self._theme_var.get()
+                # Map back to code
+                mapping = {
+                    tr("settings.theme.system"): 'system',
+                    tr("settings.theme.light"): 'light',
+                    tr("settings.theme.dark"): 'dark',
+                }
+                tm = mapping.get(theme_label, 'system')
+                self.agent.config.theme_mode = tm
+                # Apply immediately
+                if tm == 'light':
+                    ctk.set_appearance_mode("Light")
+                elif tm == 'dark':
+                    ctk.set_appearance_mode("Dark")
+                else:
+                    ctk.set_appearance_mode("System")
             except Exception:
                 pass
             save_config(self.agent.config)

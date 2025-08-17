@@ -109,6 +109,13 @@ def _migrate_v5_to_v6(data: dict) -> dict:
     data["version"] = 6
     return data
 
+def _migrate_v6_to_v7(data: dict) -> dict:
+    """Migrate v6 to v7 by adding theme mode setting."""
+    data = data.copy()
+    data.setdefault("theme_mode", "system")
+    data["version"] = 7
+    return data
+
 def load_config() -> Optional[AppConfig]:
     """Load the application configuration with automatic migration support.
 
@@ -212,6 +219,9 @@ def load_config() -> Optional[AppConfig]:
         if ver < 6:
             data = _migrate_v5_to_v6(data)
             ver = 6
+        if ver < 7:
+            data = _migrate_v6_to_v7(data)
+            ver = 7
         if data.get("version") != ver:
             data["version"] = ver
         _write_json(new_config_path, data)
@@ -222,7 +232,8 @@ def load_config() -> Optional[AppConfig]:
 
 def save_config(config: AppConfig):
     """Save the current configuration to the user-specific configuration file."""
-    data = config.model_dump(by_alias=True, exclude_none=True)
+    # Persist explicit None values (e.g., to keep hotkeys disabled on restart)
+    data = config.model_dump(by_alias=True, exclude_none=False)
     # Ensure version is set to latest
     data["version"] = config.version if hasattr(config, "version") else 4
     config_path: Path = paths.get_config_file_path()
@@ -235,7 +246,7 @@ def save_config(config: AppConfig):
 def create_default_config():
     """Create a default configuration file in the user-specific configuration directory."""
     default_config = {
-        "version": 6,
+        "version": 7,
         "prompts": {
             "check": {
                 "name": "誤字脱字を修正",
@@ -273,6 +284,7 @@ def create_default_config():
         "matrix_matrix_summary_prompt": None,
         "max_flow_steps": 5,
         "language": "auto",
+        "theme_mode": "system",
     }
     config_path: Path = paths.get_config_file_path()
     _write_json(config_path, default_config)

@@ -152,7 +152,7 @@ class AppConfig(BaseModel):
         hotkey_matrix: Optional hotkey for opening the matrix processor.
         hotkey: Deprecated single global hotkey (v2 and earlier). Kept for migration.
     """
-    version: int = 6
+    version: int = 7
     prompts: Dict[str, Prompt]
     max_history_size: int = 20
     api_key: Optional[str] = None
@@ -170,3 +170,5 @@ class AppConfig(BaseModel):
     max_flow_steps: int = 5
     # Language (v6)
     language: Optional[str] = "auto"
+    # Theme mode (v7): 'system' | 'light' | 'dark'
+    theme_mode: Optional[Literal['system','light','dark']] = 'system'
