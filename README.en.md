@@ -1,4 +1,4 @@
-# Gemini Clipboard (Desktop helper)
+# Gem Clip (Desktop helper)
 
 A desktop helper that sends your current clipboard (text / image / attached files) to Gemini using a selected prompt, then streams results into a lightweight popup. It includes prompt management, global hotkeys, clipboard history, and a matrix batch processor (multiple prompts × multiple inputs).
 

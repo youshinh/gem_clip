@@ -1,4 +1,4 @@
-APP_NAME = "Geminiクリップボード"
+APP_NAME = "Gem Clip"
 CONFIG_FILE = "config.json"
 API_SERVICE_ID = "gemini_clip"
 ICON_FILE = "icon.ico"

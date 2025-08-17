@@ -1,4 +1,4 @@
-# Gemini クリップボード (Desktop helper)
+# Gem Clip (Desktop helper)
 
 > Documentation in English is available in `README.en.md`.
 > 英語版マニュアルは `README.en.md` にあります。日本語版の詳細マニュアルは `README.ja.md` を参照してください。

@@ -126,6 +126,51 @@ def load_config() -> Optional[AppConfig]:
     # Determine paths
     new_config_path: Path = paths.get_config_file_path()
     old_config_path: Path = Path(CONFIG_FILE)
+
+    # If new config does not exist, attempt to migrate from legacy app-name locations
+    # used before the project was renamed. This preserves user settings across rename.
+    if not new_config_path.exists():
+        try:
+            import sys, os
+            legacy_names = ["Geminiクリップボード", "Gemini Clipboard"]
+            legacy_base: Optional[Path] = None
+            if sys.platform.startswith("win"):
+                appdata = os.environ.get("APPDATA")
+                if appdata:
+                    for nm in legacy_names:
+                        cand = Path(appdata) / nm
+                        if (cand / CONFIG_FILE).exists():
+                            legacy_base = cand
+                            break
+            elif sys.platform == "darwin":
+                for nm in legacy_names:
+                    cand = Path.home() / "Library" / "Application Support" / nm
+                    if (cand / CONFIG_FILE).exists():
+                        legacy_base = cand
+                        break
+            else:
+                xdg_config_home = os.environ.get("XDG_CONFIG_HOME")
+                if xdg_config_home:
+                    for nm in legacy_names:
+                        cand = Path(xdg_config_home) / nm
+                        if (cand / CONFIG_FILE).exists():
+                            legacy_base = cand
+                            break
+                if legacy_base is None:
+                    for nm in legacy_names:
+                        cand = Path.home() / ".config" / nm
+                        if (cand / CONFIG_FILE).exists():
+                            legacy_base = cand
+                            break
+            if legacy_base is not None:
+                data = _read_json(legacy_base / CONFIG_FILE)
+                if data is not None:
+                    # Write to new location with minimal changes (structural migration happens later)
+                    if _write_json(new_config_path, data):
+                        messagebox.showinfo(APP_NAME, f"旧アプリ名の設定を移行しました: {legacy_base / CONFIG_FILE} → {new_config_path}")
+        except Exception:
+            # Non-fatal: continue with other migration paths
+            pass
     # If new config does not exist but an old config file exists in the working directory,
     # migrate it to the new location.
     if not new_config_path.exists() and old_config_path.exists():
