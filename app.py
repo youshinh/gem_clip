@@ -16,109 +16,81 @@ from common_models import Prompt
 class ClipboardToolApp:
     def __init__(self):
         ctk.set_appearance_mode("System")
-
         self.app = ctk.CTk()
         self.app.withdraw()
-        # ウィンドウタイトルを設定（i18n）
+
         try:
-            from config_manager import load_config as _lc
-            _cfg = _lc()
-            if _cfg:
-                set_locale(getattr(_cfg, 'language', 'auto'))
+            _cfg = load_config()
+            if _cfg: set_locale(getattr(_cfg, 'language', 'auto'))
         except Exception:
             set_locale('auto')
-        self.app.title(tr("app.title"))
 
-        # ウィンドウ/タスクバーのアイコン設定
+        self.app.title(tr("app.title"))
+        self.app.configure(fg_color=styles.APP_BG_COLOR)
         self._set_window_icon()
 
-        # スタイルからジオメトリを読み込み、サイズを維持して中央に配置
-        self.app.update_idletasks() # Ensure screen dimensions are available
-        geometry_parts = styles.MAIN_WINDOW_GEOMETRY.split('x')
-        width = int(geometry_parts[0])
-        height = int(geometry_parts[1])
+        self.app.update_idletasks()
+        width, height = [int(x) for x in styles.MAIN_WINDOW_GEOMETRY.split('x')]
         x = (self.app.winfo_screenwidth() // 2) - (width // 2)
         y = (self.app.winfo_screenheight() // 2) - (height // 2)
         self.app.geometry(f"{width}x{height}+{x}+{y}")
 
-        # Configure grid layout
         self.app.grid_columnconfigure(0, weight=1)
-        # rows: 0 matrix section, 1 list, 2 buttons
-        self.app.grid_rowconfigure(0, weight=0)
         self.app.grid_rowconfigure(1, weight=1)
-        self.app.grid_rowconfigure(2, weight=0)
-
-        # --- UI Elements ---
-        # タイトルラベルは不要になったので削除し、ウィンドウタイトルに設定した
 
         self.agent = ClipboardToolAgent()
-        # Pass the app instance to the agent, no history callback needed
         self.agent.set_ui_elements(self.app)
 
-        # --- Matrix summary settings section (compact, no scroll) ---
-        self.matrix_section = ctk.CTkScrollableFrame(self.app, label_text=tr("matrix.section.title"), fg_color=styles.HISTORY_ITEM_FG_COLOR, height=100)
-        self.matrix_section.grid(row=0, column=0, padx=20, pady=(10, 0), sticky="ew")
-        self.matrix_section._scrollbar.grid_forget()
-        self.matrix_section.grid_columnconfigure(0, weight=1)
-        # Inner settings area with 3 rows
-        self.matrix_settings_frame = ctk.CTkFrame(self.matrix_section, fg_color="transparent")
-        # self.matrix_settings_frame.grid(row=1, column=0, padx=10, pady=(0, 6), sticky="ew")
-        self.matrix_settings_frame.grid(row=1, column=0, padx=20, pady=(0, 10), sticky="ew")
-        self.matrix_settings_frame.grid_columnconfigure(0, weight=0)
-        self.matrix_settings_frame.grid_columnconfigure(1, weight=1)
-        self.matrix_settings_frame.grid_columnconfigure(2, weight=0)
-
-        def _prompt_title(p) -> str:
-            return p.name if isinstance(p, Prompt) else tr("common.unspecified")
-
-        # Row summary
-        ctk.CTkLabel(self.matrix_settings_frame, text=tr("matrix.row_summary"), text_color=styles.HISTORY_ITEM_TEXT_COLOR).grid(row=0, column=0, padx=(10, 8), pady=2, sticky="w")
-        self.row_summary_label = ctk.CTkLabel(self.matrix_settings_frame, text=_prompt_title(getattr(self.agent.config, 'matrix_row_summary_prompt', None)), text_color=styles.HISTORY_ITEM_TEXT_COLOR)
-        self.row_summary_label.grid(row=0, column=1, padx=0, pady=2, sticky="ew")
-        ctk.CTkButton(self.matrix_settings_frame, text=tr("common.edit"), width=60, fg_color=styles.DEFAULT_BUTTON_FG_COLOR, text_color=styles.DEFAULT_BUTTON_TEXT_COLOR, command=lambda: self._edit_matrix_prompt('matrix_row_summary_prompt', self.row_summary_label)).grid(row=0, column=2, padx=(8, 10), pady=2)
-
-        # Column summary
-        ctk.CTkLabel(self.matrix_settings_frame, text=tr("matrix.col_summary"), text_color=styles.HISTORY_ITEM_TEXT_COLOR).grid(row=1, column=0, padx=(10, 8), pady=2, sticky="w")
-        self.col_summary_label = ctk.CTkLabel(self.matrix_settings_frame, text=_prompt_title(getattr(self.agent.config, 'matrix_col_summary_prompt', None)), text_color=styles.HISTORY_ITEM_TEXT_COLOR)
-        self.col_summary_label.grid(row=1, column=1, padx=0, pady=2, sticky="ew")
-        ctk.CTkButton(self.matrix_settings_frame, text=tr("common.edit"), width=60, fg_color=styles.DEFAULT_BUTTON_FG_COLOR, text_color=styles.DEFAULT_BUTTON_TEXT_COLOR, command=lambda: self._edit_matrix_prompt('matrix_col_summary_prompt', self.col_summary_label)).grid(row=1, column=2, padx=(8, 10), pady=2)
-
-        # Matrix summary
-        ctk.CTkLabel(self.matrix_settings_frame, text=tr("matrix.matrix_summary"), text_color=styles.HISTORY_ITEM_TEXT_COLOR).grid(row=2, column=0, padx=(10, 8), pady=2, sticky="w")
-        self.matrix_summary_label = ctk.CTkLabel(self.matrix_settings_frame, text=_prompt_title(getattr(self.agent.config, 'matrix_matrix_summary_prompt', None)), text_color=styles.HISTORY_ITEM_TEXT_COLOR)
-        self.matrix_summary_label.grid(row=2, column=1, padx=0, pady=2, sticky="ew")
-        ctk.CTkButton(self.matrix_settings_frame, text=tr("common.edit"), width=60, fg_color=styles.DEFAULT_BUTTON_FG_COLOR, text_color=styles.DEFAULT_BUTTON_TEXT_COLOR, command=lambda: self._edit_matrix_prompt('matrix_matrix_summary_prompt', self.matrix_summary_label)).grid(row=2, column=2, padx=(8, 10), pady=2)
-
-        # Prompt list frame
-        self.prompt_list_frame = ctk.CTkScrollableFrame(self.app, label_text=tr("prompt.list.title"), fg_color=styles.HISTORY_ITEM_FG_COLOR)
-        # 表示領域を拡大するため、行1に配置
-        self.prompt_list_frame.grid(row=1, column=0, padx=20, pady=10, sticky="nsew")
-        self.prompt_list_frame.grid_columnconfigure(0, weight=1)
-        # Bind motion and release events for drag-and-drop (list-level)
-        self.prompt_list_frame.bind("<B1-Motion>", self._on_row_motion)
-        self.prompt_list_frame.bind("<ButtonRelease-1>", self._on_row_release)
-        self.app.bind("<B1-Motion>", self._on_row_motion) # アプリ全体にバインド
-        self.app.bind("<ButtonRelease-1>", self._on_row_release) # リリースもアプリ全体で捕捉
-
-        # Button frame
-        button_frame = ctk.CTkFrame(self.app, fg_color="transparent")
-        # ボタンはスクロールリストの下に配置する
-        button_frame.grid(row=2, column=0, padx=20, pady=10, sticky="ew")
-        button_frame.grid_columnconfigure((0, 1, 2, 3), weight=1)  # Make buttons spread out
-
-        ctk.CTkButton(button_frame, text=tr("app.prompts.add"), command=self._add_prompt, fg_color=styles.DEFAULT_BUTTON_FG_COLOR, text_color=styles.DEFAULT_BUTTON_TEXT_COLOR).grid(row=0, column=1, padx=5, pady=5, sticky="ew")
-        ctk.CTkButton(button_frame, text=tr("app.prompts.save"), command=self._save_settings, fg_color=styles.DEFAULT_BUTTON_FG_COLOR, text_color=styles.DEFAULT_BUTTON_TEXT_COLOR).grid(row=0, column=2, padx=5, pady=5, sticky="ew")
+        self._setup_ui()
 
         self.app.protocol("WM_DELETE_WINDOW", self.app.withdraw)
-
-        # Initialize drag state variables for reordering prompts
         self._row_frames: List[ctk.CTkFrame] = []
         self._drag_data = {}
-        self._drag_active_frame: Optional[ctk.CTkFrame] = None # ドラッグ中のフレームを保持
-        self._row_drop_line_id: Optional[int] = None  # legacy (canvas)
-        self._row_drop_indicator_widget: Optional[tk.Frame] = None  # ドロップ位置の境界線（水平・オーバーレイ）
+        self._drag_active_frame: Optional[ctk.CTkFrame] = None
+        self._row_drop_indicator_widget: Optional[tk.Frame] = None
 
-        self._create_prompt_list_frame() # フレーム作成は初期化後に行う
+        self._create_prompt_list_frame()
+
+    def _setup_ui(self):
+        # --- Matrix Summary Settings Section ---
+        self.matrix_section = ctk.CTkFrame(self.app, fg_color=styles.FRAME_BG_COLOR, corner_radius=8)
+        self.matrix_section.grid(row=0, column=0, padx=10, pady=(10, 0), sticky="ew")
+        self.matrix_section.grid_columnconfigure(1, weight=1)
+
+        ctk.CTkLabel(self.matrix_section, text=tr("matrix.section.title"), font=styles.FONT_BOLD).grid(row=0, column=0, columnspan=3, padx=10, pady=(5,10), sticky="w")
+
+        def create_matrix_row(label_text, prompt_attr, edit_cmd, row):
+            ctk.CTkLabel(self.matrix_section, text=label_text).grid(row=row, column=0, padx=(10, 8), pady=2, sticky="w")
+            label = ctk.CTkLabel(self.matrix_section, text=self._prompt_title(getattr(self.agent.config, prompt_attr, None)), text_color=styles.TEXT_SECONDARY_COLOR, anchor="w")
+            label.grid(row=row, column=1, padx=0, pady=2, sticky="ew")
+            ctk.CTkButton(self.matrix_section, text=tr("common.edit"), width=60, command=lambda: edit_cmd(prompt_attr, label)).grid(row=row, column=2, padx=(8, 10), pady=2)
+            return label
+
+        self.row_summary_label = create_matrix_row(tr("matrix.row_summary"), 'matrix_row_summary_prompt', self._edit_matrix_prompt, 1)
+        self.col_summary_label = create_matrix_row(tr("matrix.col_summary"), 'matrix_col_summary_prompt', self._edit_matrix_prompt, 2)
+        self.matrix_summary_label = create_matrix_row(tr("matrix.matrix_summary"), 'matrix_matrix_summary_prompt', self._edit_matrix_prompt, 3)
+
+        # --- Prompt List Frame ---
+        self.prompt_list_frame = ctk.CTkFrame(self.app, fg_color=styles.FRAME_BG_COLOR, corner_radius=8)
+        self.prompt_list_frame.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
+        self.prompt_list_frame.grid_columnconfigure(0, weight=1)
+        ctk.CTkLabel(self.prompt_list_frame, text=tr("prompt.list.title"), font=styles.FONT_BOLD).grid(row=0, column=0, padx=10, pady=(5,10), sticky="w")
+
+        self.prompt_scroll_frame = ctk.CTkScrollableFrame(self.prompt_list_frame, fg_color="transparent")
+        self.prompt_scroll_frame.grid(row=1, column=0, sticky="nsew")
+        self.prompt_scroll_frame.grid_columnconfigure(0, weight=1)
+        self.prompt_list_frame.grid_rowconfigure(1, weight=1)
+
+        self.prompt_scroll_frame.bind("<B1-Motion>", self._on_row_motion)
+        self.prompt_scroll_frame.bind("<ButtonRelease-1>", self._on_row_release)
+
+        # --- Button Frame ---
+        button_frame = ctk.CTkFrame(self.app, fg_color="transparent")
+        button_frame.grid(row=2, column=0, padx=10, pady=(0, 10), sticky="ew")
+        button_frame.grid_columnconfigure((0, 1), weight=1)
+
+        ctk.CTkButton(button_frame, text=tr("app.prompts.add"), command=self._add_prompt).grid(row=0, column=0, padx=(0,5), pady=5, sticky="ew")
+        ctk.CTkButton(button_frame, text=tr("app.prompts.save"), command=self._save_settings).grid(row=0, column=1, padx=(5,0), pady=5, sticky="ew")
 
     def _set_window_icon(self) -> None:
         """Set window/taskbar icon to icon.ico where supported.
@@ -153,134 +125,41 @@ class ClipboardToolApp:
                 CTkMessagebox(title=tr("common.error"), message=tr("matrix.summary_save_failed", details=str(e)), icon="cancel")
 
     def _create_prompt_list_frame(self):
-        # Clear existing widgets and reset row frame list
-        for widget in self.prompt_list_frame.winfo_children():
+        for widget in self.prompt_scroll_frame.winfo_children():
             widget.destroy()
         self._row_frames = []
 
-        # Add logging to check the prompts in config
-        if self.agent.config and self.agent.config.prompts:
-            prompts = self.agent.config.prompts
-        else:
-            ctk.CTkLabel(self.prompt_list_frame, text=tr("prompt.none"), text_color=styles.HISTORY_ITEM_TEXT_COLOR).grid(row=0, column=0, padx=10, pady=10, sticky="w")
+        if not (self.agent.config and self.agent.config.prompts):
+            ctk.CTkLabel(self.prompt_scroll_frame, text=tr("prompt.none"), text_color=styles.TEXT_SECONDARY_COLOR).grid(row=0, column=0, padx=10, pady=10)
             return
 
-        # Create row for each prompt with draggable frame
-        for row_num, (prompt_id, prompt_config) in enumerate(prompts.items()):
-            row_frame = ctk.CTkFrame(self.prompt_list_frame, fg_color="transparent")
-            # keep mapping between frame and prompt id for stable reordering
+        for row_num, (prompt_id, prompt_config) in enumerate(self.agent.config.prompts.items()):
+            row_frame = ctk.CTkFrame(self.prompt_scroll_frame, fg_color="transparent")
             setattr(row_frame, "_prompt_id", prompt_id)
-            row_frame.grid(row=row_num, column=0, sticky="ew", padx=5, pady=2)
-            # columns: 0 handle, 1 name, 2 matrix cb, 3 edit, 4 delete
-            row_frame.grid_columnconfigure(0, weight=0)
+            row_frame.grid(row=row_num, column=0, sticky="ew", padx=5, pady=3)
             row_frame.grid_columnconfigure(1, weight=1)
-            row_frame.grid_columnconfigure(2, weight=0)
-            row_frame.grid_columnconfigure(3, weight=0)
-            row_frame.grid_columnconfigure(4, weight=0)
             self._row_frames.append(row_frame)
 
+            drag_handle = ctk.CTkLabel(row_frame, text="≡", width=18, anchor="center", text_color=styles.TEXT_SECONDARY_COLOR)
+            drag_handle.grid(row=0, column=0, padx=(6, 4), pady=5)
 
-            # Bind drag events to the row frame
-            # Note: child widgets (labels, buttons, checkboxes) can intercept click events
-            # which prevents the frame from receiving them. To ensure the drag handlers
-            # fire regardless of where the user clicks within the row, we bind the same
-            # handlers on every child widget in addition to the frame itself. This way
-            # clicks on labels, checkboxes or buttons will still initiate the drag.
-            # Pass the frame itself to the handlers so that the current index can be
-            # looked up dynamically. This allows reordering of the list without
-            # capturing stale row numbers.
-            row_frame.bind("<ButtonPress-1>", self._on_row_press)
-            row_frame.bind("<B1-Motion>", self._on_row_motion) # 各行フレームにもバインド
-            row_frame.bind("<ButtonRelease-1>", self._on_row_release) # 各行フレームにもバインド
-
-            # ドラッグハンドル
-            drag_handle = ctk.CTkLabel(
-                row_frame,
-                text="≡",
-                width=18,
-                anchor="center",
-                text_color=styles.HISTORY_ITEM_TEXT_COLOR
-            )
-            drag_handle.grid(row=0, column=0, padx=(6,4), pady=5)
-            drag_handle.bind("<ButtonPress-1>", self._on_row_press)
-
-            # プロンプト名ラベル
-            name_label = ctk.CTkLabel(
-                row_frame,
-                text=prompt_config.name,
-                anchor="w",
-                text_color=styles.HISTORY_ITEM_TEXT_COLOR
-            )
+            name_label = ctk.CTkLabel(row_frame, text=prompt_config.name, anchor="w", text_color=styles.TEXT_COLOR)
             name_label.grid(row=0, column=1, padx=6, pady=5, sticky="ew")
 
-            # Bind drag events to the name label so that dragging the text area
-            # triggers row reorder. Without these bindings, clicking directly
-            # on the label would not propagate to the parent frame.
-            name_label.bind("<ButtonPress-1>", self._on_row_press)
-            name_label.bind("<B1-Motion>", self._on_row_motion) # 各ラベルにもバインド
-            name_label.bind("<ButtonRelease-1>", self._on_row_release) # 各ラベルにもバインド
-
-            # Note: the same handlers are already bound above; remove duplicate bindings
-
-            # マトリクスへ含めるチェックボックス
             var = ctk.BooleanVar(value=getattr(prompt_config, 'include_in_matrix', False))
-            checkbox = ctk.CTkCheckBox(
-                row_frame,
-                text=tr("prompt.include_in_matrix"),
-                variable=var,
-                command=lambda p_id=prompt_id, v=var: self._toggle_prompt_matrix(p_id, v.get())
-            )
+            checkbox = ctk.CTkCheckBox(row_frame, text=tr("prompt.include_in_matrix"), variable=var, command=lambda p_id=prompt_id, v=var: self._toggle_prompt_matrix(p_id, v.get()), text_color=styles.TEXT_SECONDARY_COLOR)
             checkbox.grid(row=0, column=2, padx=5, pady=5, sticky="w")
 
-            # Bind drag events to the checkbox as well. Clicking on the checkbox
-            # should still allow for drag-and-drop when appropriate (e.g., when the
-            # user clicks and drags instead of simply toggling the checkbox). This
-            # ensures consistent drag behaviour across all widgets within the row.
-            checkbox.bind("<ButtonPress-1>", self._on_row_press)
-            checkbox.bind("<B1-Motion>", self._on_row_motion) # 各チェックボックスにもバインド
-            checkbox.bind("<ButtonRelease-1>", self._on_row_release) # 各チェックボックスにもバインド
-
-            # 編集ボタン
-            edit_button = ctk.CTkButton(
-                row_frame,
-                text=tr("common.edit"),
-                width=60,
-                fg_color=styles.DEFAULT_BUTTON_FG_COLOR,
-                text_color=styles.DEFAULT_BUTTON_TEXT_COLOR,
-                command=lambda p_id=prompt_id: self._edit_prompt(p_id)
-            )
+            edit_button = ctk.CTkButton(row_frame, text=tr("common.edit"), width=60, command=lambda p_id=prompt_id: self._edit_prompt(p_id))
             edit_button.grid(row=0, column=3, padx=5, pady=5, sticky="e")
 
-            # Bind drag events to the edit button. The lambda wrapper ensures
-            # that dragging on the button does not trigger the edit command. Without
-            # this, the button would intercept the mouse events and the drag handler
-            # would never be called.  Note: the order matters; command is triggered
-            # only on release if the click is not moved, so drag will not accidentally
-            # trigger the edit action.
-            edit_button.bind("<ButtonPress-1>", self._on_row_press)
-            edit_button.bind("<B1-Motion>", self._on_row_motion) # 各ボタンにもバインド
-            edit_button.bind("<ButtonRelease-1>", self._on_row_release) # 各ボタンにもバインド
-
-            # 削除ボタン
-            delete_button = ctk.CTkButton(
-                row_frame,
-                text=tr("common.delete"),
-                width=60,
-                fg_color=styles.DELETE_BUTTON_COLOR,
-                hover_color=styles.DELETE_BUTTON_HOVER_COLOR,
-                command=lambda p_id=prompt_id: self._delete_prompt(p_id)
-            )
+            delete_button = ctk.CTkButton(row_frame, text=tr("common.delete"), width=60, fg_color=styles.DESTRUCTIVE_COLOR, hover_color=styles.DESTRUCTIVE_HOVER_COLOR, command=lambda p_id=prompt_id: self._delete_prompt(p_id))
             delete_button.grid(row=0, column=4, padx=5, pady=5, sticky="e")
 
-            # Bind drag events to the delete button as well. Similar to the edit
-            # button, we attach our drag handlers so that starting a drag on
-            # the delete button doesn't trigger the delete action and allows
-            # reordering of rows when the mouse is moved.
-            delete_button.bind("<ButtonPress-1>", self._on_row_press)
-            delete_button.bind("<B1-Motion>", self._on_row_motion) # 各ボタンにもバインド
-            delete_button.bind("<ButtonRelease-1>", self._on_row_release) # 各ボタンにもバインド
-
-            # Ensure columns configured as above
+            for widget in (drag_handle, name_label, checkbox, edit_button, delete_button):
+                widget.bind("<ButtonPress-1>", lambda event, frame=row_frame: self._on_row_press(event, frame))
+                widget.bind("<B1-Motion>", self._on_row_motion)
+                widget.bind("<ButtonRelease-1>", self._on_row_release)
 
     def _on_row_press(self, event):
         """Record the frame and y-coordinate when a row press starts for drag-and-drop reordering."""
