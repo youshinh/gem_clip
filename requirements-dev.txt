@@ -1,0 +1,5 @@
+# Optional developer tools (install with: pip install -r requirements-dev.txt)
+pytest
+pytest-cov
+ruff
+mypy

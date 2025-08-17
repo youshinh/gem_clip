@@ -1,0 +1,42 @@
+{
+  "name": "会議議事録・決定事項整理",
+  "prompts": {
+    "minutes_structured": {
+      "name": "議事録（構造化）",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "会議の内容を目的/参加者/議題/議論要点/合意事項/宿題/次回までのToDo に整理してください。各項目は箇条書きで簡潔に。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": { "temperature": 0.2 },
+      "include_in_matrix": true
+    },
+    "decisions_list": {
+      "name": "決定事項（要約）",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "合意・決定事項のみを抽出して列挙してください。各行は『何を/いつまでに/誰が』を明示（不明は空欄可）。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": { "temperature": 0.2 },
+      "include_in_matrix": true
+    },
+    "issues_open": {
+      "name": "未解決課題・懸念",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "未解決の論点やリスクを列挙し、それぞれの前提/依存関係/ボトルネックを1行で付記してください。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": { "temperature": 0.3 },
+      "include_in_matrix": true
+    },
+    "followups_assign": {
+      "name": "フォローアップ割当",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "次回までのフォローアップを担当ごとに整理してください。形式: - 担当: タスク（期限） の箇条書き。抜けは『未定』と記載。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": { "temperature": 0.2 },
+      "include_in_matrix": true
+    }
+  }
+}
+

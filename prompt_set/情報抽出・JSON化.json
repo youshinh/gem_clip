@@ -1,0 +1,42 @@
+{
+  "name": "情報抽出・JSON化",
+  "prompts": {
+    "extract_fields": {
+      "name": "項目抽出（柔軟）",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "本文から以下の項目を抽出してください。欠損はnull。項目: タイトル, 日付, 担当, 金額, URL。短く正規化。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": {"temperature": 0.2},
+      "include_in_matrix": true
+    },
+    "json_structured": {
+      "name": "JSON出力（厳密）",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "本文から情報を抽出し、厳密に有効なJSONのみを出力してください。スキーマ: {\n  title: string|null,\n  date: string|null,\n  owner: string|null,\n  amount_jpy: number|null,\n  links: string[]\n}\n注: JSON以外の文字を出力しない。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": {"temperature": 0.0},
+      "include_in_matrix": true
+    },
+    "table_markdown": {
+      "name": "表形式（Markdown）",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "データ点を行としてMarkdown表にまとめてください。列: 項目, 値, 備考。見出し行含む。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": {"temperature": 0.2},
+      "include_in_matrix": true
+    },
+    "regex_ready": {
+      "name": "機械抽出向け正規化",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "数値・日付・金額・ID・URLなどを機械処理しやすい形に正規化し、1行1項目のリストで出力してください。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": {"temperature": 0.1},
+      "include_in_matrix": true
+    }
+  }
+}
+

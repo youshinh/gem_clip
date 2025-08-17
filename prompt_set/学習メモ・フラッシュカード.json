@@ -1,0 +1,42 @@
+{
+  "name": "学習メモ・フラッシュカード",
+  "prompts": {
+    "flashcards_basic": {
+      "name": "フラッシュカード（Q/A×8-12）",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "本文の要点から基本的なQ/Aカードを8〜12枚作成してください。各Qは1行、Aも1行、簡潔に。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": { "temperature": 0.5 },
+      "include_in_matrix": true
+    },
+    "key_points": {
+      "name": "キーポイント要約（5-8件）",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "テスト直前の見直し用に、暗記が必要なキーポイントを5〜8件、各1行で箇条書きしてください。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": { "temperature": 0.2 },
+      "include_in_matrix": true
+    },
+    "analogy_explain": {
+      "name": "たとえ話で説明",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "難所概念を日常のたとえで説明してください。2〜3文、専門用語を避け、直感的に理解できる比喩を用いる。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": { "temperature": 0.7 },
+      "include_in_matrix": true
+    },
+    "pop_quiz": {
+      "name": "小テスト（5問・解答付き）",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "内容理解を確認する5問の小テストを作り、各問の直後に模範解答を1行で示してください。出題は網羅的に。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": { "temperature": 0.4 },
+      "include_in_matrix": true
+    }
+  }
+}
+

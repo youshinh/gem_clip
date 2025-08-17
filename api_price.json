@@ -1,0 +1,94 @@
+{
+  "gemini-2.5-pro": {
+    "default": {
+      "input_cost_per_thousand_tokens": 0.00125,
+      "output_cost_per_thousand_tokens": 0.01
+    },
+    "tiers": [
+      {
+        "threshold_tokens": 200000,
+        "input_cost_per_thousand_tokens": 0.0025,
+        "output_cost_per_thousand_tokens": 0.015
+      }
+    ]
+  },
+  "gemini-2.5-flash": {
+    "input_cost_per_thousand_tokens": 0.0003,
+    "output_cost_per_thousand_tokens": 0.0025
+  },
+  "gemini-2.5-flash-lite": {
+    "input_cost_per_thousand_tokens": 0.0001,
+    "output_cost_per_thousand_tokens": 0.0004
+  },
+  "gemini-2.5-flash-native-audio": {
+    "input_cost_per_thousand_tokens": 0.0005,
+    "output_cost_per_thousand_tokens": 0.002
+  },
+  "gemini-2.5-flash-preview-tts": {
+    "input_cost_per_thousand_tokens": 0.0005,
+    "output_cost_per_thousand_tokens": 0.01
+  },
+  "gemini-2.5-pro-preview-tts": {
+    "input_cost_per_thousand_tokens": 0.001,
+    "output_cost_per_thousand_tokens": 0.02
+  },
+  "gemini-2.0-flash": {
+    "input_cost_per_thousand_tokens": 0.0001,
+    "output_cost_per_thousand_tokens": 0.0004
+  },
+  "gemini-2.0-flash-lite": {
+    "input_cost_per_thousand_tokens": 0.000075,
+    "output_cost_per_thousand_tokens": 0.0003
+  },
+  "gemini-embedding": {
+    "input_cost_per_thousand_tokens": 0.00015,
+    "output_cost_per_thousand_tokens": 0
+  },
+  "gemma-3": {
+    "input_cost_per_thousand_tokens": 0,
+    "output_cost_per_thousand_tokens": 0
+  },
+  "gemma-3n": {
+    "input_cost_per_thousand_tokens": 0,
+    "output_cost_per_thousand_tokens": 0
+  },
+  "gemini-1.5-flash": {
+    "default": {
+      "input_cost_per_thousand_tokens": 0.000075,
+      "output_cost_per_thousand_tokens": 0.0003
+    },
+    "tiers": [
+      {
+        "threshold_tokens": 128000,
+        "input_cost_per_thousand_tokens": 0.00015,
+        "output_cost_per_thousand_tokens": 0.0006
+      }
+    ]
+  },
+  "gemini-1.5-flash-8b": {
+    "default": {
+      "input_cost_per_thousand_tokens": 0.0000375,
+      "output_cost_per_thousand_tokens": 0.00015
+    },
+    "tiers": [
+      {
+        "threshold_tokens": 128000,
+        "input_cost_per_thousand_tokens": 0.000075,
+        "output_cost_per_thousand_tokens": 0.0003
+      }
+    ]
+  },
+  "gemini-1.5-pro": {
+    "default": {
+      "input_cost_per_thousand_tokens": 0.00125,
+      "output_cost_per_thousand_tokens": 0.005
+    },
+    "tiers": [
+      {
+        "threshold_tokens": 128000,
+        "input_cost_per_thousand_tokens": 0.0025,
+        "output_cost_per_thousand_tokens": 0.01
+      }
+    ]
+  }
+}

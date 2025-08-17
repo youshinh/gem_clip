@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.venv/
+\.venv/
+venv/
+ENV/
+.env
+
+# OS/files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Local config (created at first run; do not commit)
+config.json
+.vscode/
+.serena/
+.roo/
+.idea/
+.python-version
+.ipynb_checkpoints/
+.cache/
+.coverage
+coverage.xml
+htmlcov/
+.gemini/
+
+# Build artifacts
+dist/
+build/
+*.spec
+
+# Matrix user data (keep presets tracked if added explicitly)
+prompt_set/session.json
+prompt_set/sessions/*

@@ -1,0 +1,42 @@
+{
+  "name": "SNS投稿ジェネレーター",
+  "prompts": {
+    "x_post": {
+      "name": "X（旧Twitter）投稿案",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "本文を140〜180字の日本語ポストに変換してください。1〜2個の関連ハッシュタグを末尾につけ、煽りや過度な断定は避ける。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": { "temperature": 0.8 },
+      "include_in_matrix": true
+    },
+    "linkedin_post": {
+      "name": "LinkedIn向け投稿案",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "ビジネス読者向けに、洞察・学び・次アクションを含む140〜220字の投稿を作成してください。敬体、絵文字は控えめ。最後に1つ質問を。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": { "temperature": 0.7 },
+      "include_in_matrix": true
+    },
+    "instagram_caption": {
+      "name": "Instagramキャプション",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "フレンドリーでポジティブなトーンで、1〜3文のキャプションを生成してください。行間を空けて読みやすく。絵文字は2〜4個程度。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": { "temperature": 0.9 },
+      "include_in_matrix": true
+    },
+    "hashtag_suggestions": {
+      "name": "ハッシュタグ候補（10個）",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "本文に基づく関連ハッシュタグを10個、#から始まる形で列挙してください。一般名詞中心、過度に一般的なタグは避ける。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": { "temperature": 0.8 },
+      "include_in_matrix": true
+    }
+  }
+}
+

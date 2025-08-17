@@ -1,0 +1,51 @@
+{
+  "name": "営業メール化",
+  "prompts": {
+    "rewrite_outreach": {
+      "name": "営業メール（新規開拓）",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "本文をB2Bの新規開拓メールにリライトしてください。構成: 1) 背景/課題共感 2) 提案価値 3) 社会的証明(あれば) 4) 次アクション。1通200〜250字目安、敬体、過度な誇張は避ける。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": {"temperature": 0.6},
+      "include_in_matrix": true
+    },
+    "subject_lines": {
+      "name": "件名案×5（30字以内）",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "本文に基づき、30字以内の件名案を5つ提案してください。クリックを狙いつつ、釣り見出しは避ける。箇条書きで。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": {"temperature": 0.8},
+      "include_in_matrix": true
+    },
+    "value_bullets": {
+      "name": "価値訴求の弾（3〜5個）",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "相手のKPI/課題に紐づく価値訴求ポイントを3〜5個、1行20〜40字で箇条書きしてください。数値/効果は控えめに具体化。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": {"temperature": 0.5},
+      "include_in_matrix": true
+    },
+    "cta_options": {
+      "name": "CTA案（低→高コミット）",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "次アクションのCTAを、低コミット→高コミットの順で3案提示してください（例: 資料送付可否→15分面談→デモ）。各1行で丁寧に。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": {"temperature": 0.5},
+      "include_in_matrix": true
+    },
+    "follow_up": {
+      "name": "フォローアップ（未返信向け）",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "未返信の相手に失礼なく送るフォローアップ文面を作成してください。前回の要点を10〜15字で想起させ、丁寧に選択肢を提示。150字前後。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": {"temperature": 0.6},
+      "include_in_matrix": true
+    }
+  }
+}
+

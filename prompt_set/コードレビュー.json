@@ -1,0 +1,51 @@
+{
+  "name": "コードレビュー",
+  "prompts": {
+    "general_review": {
+      "name": "総合レビュー（改善提案付き）",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "以下のコード片を総合レビューしてください。バグの可能性、アンチパターン、簡潔化、命名、例外処理、I/Oや境界値の考慮を指摘し、改善差分の擬似パッチ（Before/After）も簡潔に示してください。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": {"temperature": 0.3},
+      "include_in_matrix": true
+    },
+    "security_review": {
+      "name": "セキュリティ観点",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "コードのセキュリティリスクを検査してください。入力検証、認可・認証、秘密情報の取り扱い、ログ/エラー出力、依存関係、コマンド/SQLインジェクション、XSS/CSRFの懸念を箇条書きで指摘し、対策を短く提案してください。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": {"temperature": 0.2},
+      "include_in_matrix": true
+    },
+    "performance_review": {
+      "name": "パフォーマンス観点",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "計算量、データ構造、不要な割り当て/コピー、I/O回数、同期/ロック、ネットワーク往復、N+1の有無を確認し、効果が高い最小限の改善を3件以内で提案してください。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": {"temperature": 0.2},
+      "include_in_matrix": true
+    },
+    "readability_refactor": {
+      "name": "可読性・メンテ性リファクタ",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "関数分割、早期return、命名、コメント/ドキュメンテーション、定数化、重複排除の観点からリファクタ提案を行い、要点を短いBefore/After例で示してください。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": {"temperature": 0.4},
+      "include_in_matrix": true
+    },
+    "test_suggestions": {
+      "name": "テスト観点（ケース提案）",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "境界値、異常系、並行/再入、I/O失敗、設定/環境差を考慮したテストケースを5〜8個提案し、それぞれの目的を1行で記してください。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": {"temperature": 0.3},
+      "include_in_matrix": true
+    }
+  }
+}
+

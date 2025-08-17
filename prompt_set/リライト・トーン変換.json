@@ -1,0 +1,42 @@
+{
+  "name": "リライト・トーン変換",
+  "prompts": {
+    "polish_formal": {
+      "name": "丁寧文に推敲",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "文体を丁寧で読みやすいビジネス文書に推敲してください。冗長さを削り、論旨の明確化を重視。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": {"temperature": 0.5},
+      "include_in_matrix": true
+    },
+    "polish_concise": {
+      "name": "簡潔化（要点のみ）",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "要点のみを残し、可能な限り短く言い換えてください（箇条書き可、固有名詞は保持）。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": {"temperature": 0.4},
+      "include_in_matrix": true
+    },
+    "tone_friendly": {
+      "name": "フレンドリーな口調",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "内容を変えず、親しみやすい・柔らかい口調にリライトしてください。敬体は維持。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": {"temperature": 0.7},
+      "include_in_matrix": true
+    },
+    "tone_analytical": {
+      "name": "分析的・客観トーン",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "主張と根拠を整理し、因果と比較を明示する分析的トーンに改稿してください。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": {"temperature": 0.4},
+      "include_in_matrix": true
+    }
+  }
+}
+

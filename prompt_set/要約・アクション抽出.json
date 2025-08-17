@@ -1,0 +1,42 @@
+{
+  "name": "要約・アクション抽出",
+  "prompts": {
+    "short_summary": {
+      "name": "短い要約（3文）",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "以下のテキストを3文以内で簡潔に要約してください。重要点を落とさず、固有名詞は保持。出力は日本語。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": {"temperature": 0.4},
+      "include_in_matrix": true
+    },
+    "bullet_digest": {
+      "name": "箇条書きダイジェスト",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "主要ポイントを5項目以内の箇条書きで要約してください。各行は20〜60字程度。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": {"temperature": 0.3},
+      "include_in_matrix": true
+    },
+    "qna_key_points": {
+      "name": "要点Q&A化",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "テキストから読者の疑問と答えを3組作成してください。出力: Q: ...\nA: ... の形式。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": {"temperature": 0.5},
+      "include_in_matrix": true
+    },
+    "action_items": {
+      "name": "アクションアイテム抽出",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "本文から実行可能なアクションを最大5件抽出し、\n- タスク: ...\n- 期限: (あれば)\n- 担当: (あれば)\nの項目で簡潔に列挙してください。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": {"temperature": 0.4},
+      "include_in_matrix": true
+    }
+  }
+}
+

@@ -1,0 +1,17 @@
+# Runtime dependencies
+# Note: tkinter ships with many Python distributions and is not installed via pip.
+
+# Gemini SDK (streaming, token counting, tools config)
+google-generativeai>=0.7
+
+# Pydantic v2 API is used (ConfigDict, BaseModel v2)
+pydantic>=2
+
+# Cross-platform helpers
+keyboard
+keyring
+pyperclip
+pystray
+Pillow
+customtkinter
+CTkMessagebox

@@ -1,0 +1,42 @@
+{
+  "name": "翻訳・ローカライズ",
+  "prompts": {
+    "ja_to_en": {
+      "name": "和文→英文（自然な英語）",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "日本語を自然なプロフェッショナル英語に翻訳してください。意味忠実・過度な意訳禁止。必要に応じて句読点・冠詞を補正。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": {"temperature": 0.3},
+      "include_in_matrix": true
+    },
+    "en_to_ja": {
+      "name": "英文→和文（読みやすく）",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "英語を読みやすい自然な日本語に翻訳してください。専門用語は文脈に応じて適切に訳語選定。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": {"temperature": 0.3},
+      "include_in_matrix": true
+    },
+    "localize_app": {
+      "name": "アプリUIローカライズ",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "UI文言をプロダクト文脈に沿ってローカライズしてください。短く一貫性ある表現を優先し、術語のブレを避ける。出力は鍵=訳の一覧。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": {"temperature": 0.3},
+      "include_in_matrix": true
+    },
+    "glossary_check": {
+      "name": "用語統一・用語集準拠",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "与えられた用語集に準拠して語彙を統一してください。差分は『原文→推奨語』の対応で示し、本文を修正。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": {"temperature": 0.2},
+      "include_in_matrix": true
+    }
+  }
+}
+

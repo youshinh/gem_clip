@@ -1,0 +1,42 @@
+{
+  "name": "事業分析・SWOT/PEST/競合",
+  "prompts": {
+    "swot_summary": {
+      "name": "SWOT要約",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "Strengths/Weaknesses/Opportunities/Threats を各3点以内で簡潔に列挙してください。各点は15〜30字程度。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": { "temperature": 0.3 },
+      "include_in_matrix": true
+    },
+    "pest_factors": {
+      "name": "PEST要因整理",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "政治(P)、経済(E)、社会(S)、技術(T)の観点で重要要因を各2-3点挙げ、事業への影響を1行で示してください。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": { "temperature": 0.3 },
+      "include_in_matrix": true
+    },
+    "competitor_matrix": {
+      "name": "競合比較マトリクス",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "主要競合3社を想定し、価格、主機能、差別化要因、弱点を表形式で比較要約してください（Markdown可）。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": { "temperature": 0.2 },
+      "include_in_matrix": true
+    },
+    "usp_statement": {
+      "name": "USP・ポジショニング",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "本文を踏まえ、差別化の核となるUSPを1文で定義し、誰に/何を/どうやってを明確化してください。最後に3語以内のスローガン案を1つ。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": { "temperature": 0.5 },
+      "include_in_matrix": true
+    }
+  }
+}
+

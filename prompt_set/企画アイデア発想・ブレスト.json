@@ -1,0 +1,42 @@
+{
+  "name": "企画アイデア発想・ブレスト",
+  "prompts": {
+    "idea_brainstorm_10": {
+      "name": "アイデア10連発（1行ずつ）",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "与えられたテーマに対して、相互に重複しない実行可能なアイデアを10件、各1行で提案してください。ターゲット・提供価値・実現の容易さを意識。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": { "temperature": 0.9 },
+      "include_in_matrix": true
+    },
+    "angle_variations": {
+      "name": "切り口バリエーション（5種）",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "同じテーマを『ペイン起点』『快楽/喜び起点』『時短・自動化』『共同体/コミュニティ』『ゲーム化』の5つの切り口で再解釈し、それぞれの方向性を1-2文で述べてください。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": { "temperature": 0.8 },
+      "include_in_matrix": true
+    },
+    "risk_countermeasures": {
+      "name": "リスクと対策（表）",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "想定される主要リスクを5件挙げ、各リスクに対する回避/低減/受容のいずれかの戦略と、初動のミティゲーションを1行で提示してください。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": { "temperature": 0.4 },
+      "include_in_matrix": true
+    },
+    "next_actions": {
+      "name": "次の一手（3-5件）",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "最小のコストで学習が最大化される『次の一手』を3〜5件、1行20〜40字で提示してください。検証可能性とスピード優先。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": { "temperature": 0.5 },
+      "include_in_matrix": true
+    }
+  }
+}
+

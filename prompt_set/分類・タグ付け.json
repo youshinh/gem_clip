@@ -1,0 +1,42 @@
+{
+  "name": "分類・タグ付け",
+  "prompts": {
+    "category_coarse": {
+      "name": "粗いカテゴリ分類",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "本文を以下のいずれかに分類してください: 企画/要件, 設計, 実装, テスト, 障害/不具合, 連絡/その他。根拠を1文で添える。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": {"temperature": 0.2},
+      "include_in_matrix": true
+    },
+    "labels_multitag": {
+      "name": "マルチタグ付け",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "本文のテーマに沿って、#タグ を3〜6個提案してください。一般名詞中心、固有名詞は必要時のみ。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": {"temperature": 0.6},
+      "include_in_matrix": true
+    },
+    "priority_triage": {
+      "name": "優先度トリアージ",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "課題の深刻度と緊急度をLow/Medium/Highで評価し、理由を2行以内で述べてください。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": {"temperature": 0.3},
+      "include_in_matrix": true
+    },
+    "audience_fit": {
+      "name": "対象読者判定",
+      "model": "gemini-2.5-flash-lite",
+      "system_prompt": "本文の想定読者（例: エンジニア/ビジネス/一般）と理解に必要な前提知識を推定し、勧告を1行で提示してください。",
+      "thinking_level": "Balanced",
+      "enable_web": false,
+      "parameters": {"temperature": 0.4},
+      "include_in_matrix": true
+    }
+  }
+}
+
