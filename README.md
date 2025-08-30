@@ -107,10 +107,5 @@ pip install -r requirements-dev.txt
 - セキュリティ方針（脆弱性報告）: `SECURITY.md`
 - サポート/問い合わせ方針: `SUPPORT.md`
 
-## 開発メモ
-- テストは pure helper を中心に `pytest` を推奨（任意）
-- 秘密情報はコミットしないでください（API キーは keyring に保存）
-- 設定ファイルはユーザ領域に作成され、`.gitignore` 済みです
-
 ---
 改善提案・不具合報告は Issue/Pull Request にて歓迎します。
